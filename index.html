@@ -22,11 +22,12 @@
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 2px solid #e1e5eb; border-radius: 8px; font-size: 16px; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--primary); }
-        .radio-group { display: flex; gap: 15px; margin-top: 5px; }
-        .radio-option { flex: 1; position: relative; }
-        .radio-option input { display: none; }
-        .radio-option label { display: block; background: #f8f9fa; border: 2px solid #e1e5eb; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
-        .radio-option input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        /* Simple Buttons Layout for Mobile Compatibility */
+        .btn-group { display: flex; gap: 15px; margin-top: 5px; }
+        .type-btn { flex: 1; padding: 12px; background: #f8f9fa; border: 2px solid #e1e5eb; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--text); transition: 0.3s; text-align: center; }
+        .type-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
         .results-box { background: var(--secondary); color: white; padding: 20px; border-radius: 12px; margin-top: 25px; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px; opacity: 0.9; }
         .result-row.total { margin-bottom: 0; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 20px; font-weight: 700; opacity: 1; color: var(--success); }
@@ -56,15 +57,9 @@
 
     <div class="form-group">
         <label>VAT Type</label>
-        <div class="radio-group">
-            <div class="radio-option">
-                <input type="radio" id="exclusive" name="vatType" value="exclusive" checked>
-                <label for="exclusive">Add VAT</label>
-            </div>
-            <div class="radio-option">
-                <input type="radio" id="inclusive" name="vatType" value="inclusive">
-                <label for="inclusive">Remove VAT</label>
-            </div>
+        <div class="btn-group">
+            <div id="btn-add" class="type-btn active">Add VAT</div>
+            <div id="btn-remove" class="type-btn">Remove VAT</div>
         </div>
     </div>
 
@@ -85,25 +80,29 @@
 </div>
 
 <script>
-    const amountInput = document.getElementById('amount');
-    const countrySelect = document.getElementById('country');
-    const exclusiveRadio = document.getElementById('exclusive');
-    const inclusiveRadio = document.getElementById('inclusive');
-    
-    function calculateVAT() {
-        const amount = parseFloat(amountInput.value) || 0;
-        const vatRate = parseFloat(countrySelect.value) || 0;
-        const isInclusive = inclusiveRadio.checked;
+    var currentType = 'add'; // Default type is Add VAT
 
-        let net, vat, total;
+    function calculate() {
+        var amountField = document.getElementById('amount');
+        var countryField = document.getElementById('country');
+        
+        var amount = parseFloat(amountField.value);
+        if (isNaN(amount)) { amount = 0; }
+        
+        var vatRate = parseFloat(countryField.value);
+        if (isNaN(vatRate)) { vatRate = 0; }
 
-        if (isInclusive) {
-            // VAT inclusive: Amount mein tax pehle se shamil hai (Remove VAT)
+        var net = 0;
+        var vat = 0;
+        var total = 0;
+
+        if (currentType === 'remove') {
+            // Remove VAT (Amount includes tax)
             total = amount;
             net = total / (1 + (vatRate / 100));
             vat = total - net;
         } else {
-            // VAT exclusive: Amount mein tax add krna hai (Add VAT)
+            // Add VAT (Amount excludes tax)
             net = amount;
             vat = net * (vatRate / 100);
             total = net + vat;
@@ -114,15 +113,29 @@
         document.getElementById('resTotal').innerText = '€' + total.toFixed(2);
     }
 
-    // Saare inputs par events lagana taake live changes hon
-    amountInput.addEventListener('input', calculateVAT);
-    amountInput.addEventListener('keyup', calculateVAT);
-    countrySelect.addEventListener('change', calculateVAT);
-    exclusiveRadio.addEventListener('change', calculateVAT);
-    inclusiveRadio.addEventListener('change', calculateVAT);
-    
-    // Page load hote hi pehli calculation chalane ke liye
-    calculateVAT();
+    // Button toggle functionality
+    document.getElementById('btn-add').onclick = function() {
+        currentType = 'add';
+        document.getElementById('btn-add').className = 'type-btn active';
+        document.getElementById('btn-remove').className = 'type-btn';
+        calculate();
+    };
+
+    document.getElementById('btn-remove').onclick = function() {
+        currentType = 'remove';
+        document.getElementById('btn-remove').className = 'type-btn';
+        document.getElementById('btn-add').className = 'type-btn';
+        document.getElementById('btn-remove').className = 'type-btn active';
+        calculate();
+    };
+
+    // Live input inputs
+    document.getElementById('amount').oninput = calculate;
+    document.getElementById('amount').onkeyup = calculate;
+    document.getElementById('country').onchange = calculate;
+
+    // Initial run
+    calculate();
 </script>
 
 </body>
