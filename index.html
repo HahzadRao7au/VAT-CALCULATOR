@@ -87,19 +87,23 @@
 <script>
     const amountInput = document.getElementById('amount');
     const countrySelect = document.getElementById('country');
+    const exclusiveRadio = document.getElementById('exclusive');
+    const inclusiveRadio = document.getElementById('inclusive');
     
     function calculateVAT() {
         const amount = parseFloat(amountInput.value) || 0;
-        const vatRate = parseFloat(countrySelect.value);
-        const isInclusive = document.getElementById('inclusive').checked;
+        const vatRate = parseFloat(countrySelect.value) || 0;
+        const isInclusive = inclusiveRadio.checked;
 
         let net, vat, total;
 
         if (isInclusive) {
+            // VAT inclusive: Amount mein tax pehle se shamil hai (Remove VAT)
             total = amount;
             net = total / (1 + (vatRate / 100));
             vat = total - net;
         } else {
+            // VAT exclusive: Amount mein tax add krna hai (Add VAT)
             net = amount;
             vat = net * (vatRate / 100);
             total = net + vat;
@@ -110,24 +114,15 @@
         document.getElementById('resTotal').innerText = '€' + total.toFixed(2);
     }
 
+    // Saare inputs par events lagana taake live changes hon
     amountInput.addEventListener('input', calculateVAT);
+    amountInput.addEventListener('keyup', calculateVAT);
     countrySelect.addEventListener('change', calculateVAT);
-    document.getElementById('exclusive').addEventListener('change', calculateVAT);
-    document.getElementById('inclusive').addEventListener('change', calculateVAT);
+    exclusiveRadio.addEventListener('change', calculateVAT);
+    inclusiveRadio.addEventListener('change', calculateVAT);
     
-    // Initial load pe calculation chalane ke liye
+    // Page load hote hi pehli calculation chalane ke liye
     calculateVAT();
-</script>
-
-</body>
-</html>        document.getElementById('resVat').innerText = '€' + vat.toFixed(2);
-        document.getElementById('resTotal').innerText = '€' + total.toFixed(2);
-    }
-
-    amountInput.addEventListener('input', calculateVAT);
-    countrySelect.addEventListener('change', calculateVAT);
-    document.getElementById('exclusive').addEventListener('change', calculateVAT);
-    document.getElementById('inclusive').addEventListener('change', calculateVAT);
 </script>
 
 </body>
