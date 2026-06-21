@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EuroVAT Calc - Free European VAT Calculator</title>
+    <style>
+        :root {
+            --primary: #0052cc;
+            --secondary: #071e3d;
+            --light: #f4f6f9;
+            --white: #ffffff;
+            --text: #333333;
+            --success: #2ed573;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light); color: var(--text); padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .calc-container { background: var(--white); width: 100%; max-width: 500px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { color: var(--secondary); margin-bottom: 20px; font-size: 24px; text-align: center; font-weight: 700; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e1e5eb; border-radius: 8px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--primary); }
+        .radio-group { display: flex; gap: 15px; margin-top: 5px; }
+        .radio-option { flex: 1; position: relative; }
+        .radio-option input { display: none; }
+        .radio-option label { display: block; background: #f8f9fa; border: 2px solid #e1e5eb; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .radio-option input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
+        .results-box { background: var(--secondary); color: white; padding: 20px; border-radius: 12px; margin-top: 25px; }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px; opacity: 0.9; }
+        .result-row.total { margin-bottom: 0; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 20px; font-weight: 700; opacity: 1; color: var(--success); }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <h1>🇪🇺 European VAT Calculator</h1>
+    
+    <div class="form-group">
+        <label for="amount">Amount (€)</label>
+        <input type="number" id="amount" value="100" placeholder="Enter amount">
+    </div>
+
+    <div class="form-group">
+        <label for="country">Country (VAT Rate)</label>
+        <select id="country">
+            <option value="20" selected>United Kingdom (20%)</option>
+            <option value="19">Germany (19%)</option>
+            <option value="20">France (20%)</option>
+            <option value="21">Spain (21%)</option>
+            <option value="22">Italy (22%)</option>
+            <option value="23">Ireland (23%)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>VAT Type</label>
+        <div class="radio-group">
+            <div class="radio-option">
+                <input type="radio" id="exclusive" name="vatType" value="exclusive" checked>
+                <label for="exclusive">Add VAT</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" id="inclusive" name="vatType" value="inclusive">
+                <label for="inclusive">Remove VAT</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-box">
+        <div class="result-row">
+            <span>Net Amount:</span>
+            <span id="resNet">€100.00</span>
+        </div>
+        <div class="result-row">
+            <span>VAT Amount:</span>
+            <span id="resVat">€20.00</span>
+        </div>
+        <div class="result-row total">
+            <span>Gross Total:</span>
+            <span id="resTotal">€120.00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const amountInput = document.getElementById('amount');
+    const countrySelect = document.getElementById('country');
+    const vatTypeRadios = document.querySelectorAll('name="vatType"');
+    
+    function calculateVAT() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const vatRate = parseFloat(countrySelect.value);
+        const isInclusive = document.getElementById('inclusive').checked;
+
+        let net, vat, total;
+
+        if (isInclusive) {
+            // VAT inclusive: Amount mein tax shamil hai
+            total = amount;
+            net = total / (1 + (vatRate / 100));
+            vat = total - net;
+        } else {
+            // VAT exclusive: Amount mein tax add krna hai
+            net = amount;
+            vat = net * (vatRate / 100);
+            total = net + vat;
+        }
+
+        document.getElementById('resNet').innerText = '€' + net.toFixed(2);
+        document.getElementById('resVat').innerText = '€' + vat.toFixed(2);
+        document.getElementById('resTotal').innerText = '€' + total.toFixed(2);
+    }
+
+    amountInput.addEventListener('input', calculateVAT);
+    countrySelect.addEventListener('change', calculateVAT);
+    document.getElementById('exclusive').addEventListener('change', calculateVAT);
+    document.getElementById('inclusive').addEventListener('change', calculateVAT);
+</script>
+
+</body>
+</html>
